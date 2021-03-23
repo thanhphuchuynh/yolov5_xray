@@ -375,7 +375,7 @@ def plot_results_overlay(start=0, stop=0):  # from utils.plots import *; plot_re
             ax[i].set_title(t[i])
             ax[i].legend()
             ax[i].set_ylabel(f) if i == 0 else None  # add filename
-        fig.savefig(f.replace('.txt', '.png'), dpi=200)
+        fig.savefig(f.replace('.txt', 'over.png'), dpi=200)
 
 
 def plot_results(start=0, stop=0, bucket='', id=(), labels=(), save_dir=''):
