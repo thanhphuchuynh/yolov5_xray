@@ -1,7 +1,10 @@
 #lib
 import pandas as pd
 import cv2
+import numpy as np
+
 import matplotlib.pyplot as plt
+from PIL import Image
 
 PATH_FOLDER = '/Final/Demo/VINAI_Chest_Xray/VINAI_Chest_Xray/train/'
 PATH_csv = '/Final/Demo/VINAI_Chest_Xray/VINAI_Chest_Xray/train.csv'
@@ -10,7 +13,7 @@ df_train = pd.read_csv(PATH_csv)
 # print(df_train)
 
 # test_img_id = '02617da0a33fe0446a508186417c2646'
-test_img_id = '7c6f191b5d28bc1992e491d906f0d1a5'
+test_img_id = '89e6ab133f587191383608ee04cea79a'
 
 test_df = df_train[df_train['image_id'] == test_img_id]
 print(test_df) 
@@ -84,14 +87,14 @@ def averageCoordinates(df,threshold):
                     boxA = [row1['x_min'], row1['y_min'], row1['x_max'], row1['y_max']]
                     boxB = [row2['x_min'], row2['y_min'], row2['x_max'], row2['y_max']]
                     iou = bb_intersection_over_union(boxA, boxB)
-                    print("class_id", row1["class_id"])
-                    print("iou", iou)
+                    # print("class_id", row1["class_id"])
+                    # print("iou", iou)
                     if iou > threshold:
                         if row1["index"] not in duplicate:
                             duplicate[row1["index"]] = []
                         duplicate[row1["index"]].append(row2["index"])
     remove_keys = []
-
+    # print(tmp_df,"\n",duplicate)
     for k in duplicate:
         for i in duplicate[k]:
             if i in duplicate:
@@ -100,14 +103,17 @@ def averageCoordinates(df,threshold):
                         duplicate[k].append(id)
                 if i not in remove_keys:
                     remove_keys.append(i)
-    # print(remove_keys)
+    print("\n")        
+    print(remove_keys,"\n",duplicate)
     for i in remove_keys:
         del duplicate[i]
-
+    # print(tmp_df,duplicate)
+    print(remove_keys,"\n",duplicate)
     rows = []
     removed_index = []
     for k in duplicate:
         row = tmp_df[tmp_df['index'] == k].iloc[0]
+        # print(row,"\n")
         X_min = [row['x_min']]
         X_max = [row['x_max']]
         Y_min = [row['y_min']]
@@ -125,6 +131,7 @@ def averageCoordinates(df,threshold):
         Y_min_avg = sum(Y_min) / len(Y_min)
         Y_max_avg = sum(Y_max) / len(Y_max)
         new_row = [row['image_id'], row['class_name'], row['class_id'], X_min_avg, Y_min_avg, X_max_avg, Y_max_avg, row['width'], row['height']]
+        # print(new_row)
         rows.append(new_row)
 
     for index, row in tmp_df.iterrows():
@@ -135,9 +142,19 @@ def averageCoordinates(df,threshold):
     new_df = pd.DataFrame(rows, columns =['image_id', 'class_name', 'class_id', 'x_min', 'y_min', 'x_max', 'y_max', 'width', 'height'])
     return new_df
     
+def resize(array, size, keep_ratio=False, resample=Image.LANCZOS):
+    # Original from: https://www.kaggle.com/xhlulu/vinbigdata-process-and-resize-to-image
+    im = Image.fromarray(array)
+    
+    if keep_ratio:
+        im.thumbnail((size, size), resample)
+    else:
+        im = im.resize((size, size), resample)
+    
+    return im
 
 new_df = averageCoordinates(test_df,0.5)
-# print(new_df)
+print(new_df)
 
 rows = 1
 columns = 2 
@@ -153,3 +170,14 @@ plt.axis('off')
 plt.title("With IOU")
 plt.imshow(imgIOU)
 plt.show()
+
+
+im = resize(imgIOU, size=512)  
+print(np.ascontiguousarray(im).shape)
+
+# im.save("256.jpg")
+im = Image.fromarray(imgIOU)
+print(np.ascontiguousarray(im).shape)
+
+# im.save("ori.jpg")
+print(im)
