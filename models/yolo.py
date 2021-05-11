@@ -4,6 +4,7 @@ import math
 import sys
 from copy import deepcopy
 from pathlib import Path
+from matplotlib.pyplot import bar_label
 
 import torch
 import torch.nn as nn
@@ -51,6 +52,8 @@ class Detect(nn.Module):
         # x = x.copy()  # for profiling
         z = []  # inference output
         self.training |= self.export
+       
+        # fig, axis = plt.subplots(1,2,figsize=(15,5))
         for i in range(self.nl):
             # output.cpu().data.numpy().argmax()
             import numpy as np
@@ -71,16 +74,31 @@ class Detect(nn.Module):
             # tensor_to_pil = transforms.ToPILImage()(x[i][0].squeeze_(0))
             # print(tensor_to_pil.size)
             # img = images.permute(1, 2, 0).cpu().detach().numpy()
-           
+            # A = x[i][0].permute(3, 0, 1, 2)[0, :, :, :].permute(1, 2, 0).cpu().detach().numpy()
+            # print(A, A.shape, A[:, :, ::-1].shape)
             # print(x[i][0].permute(3, 0, 1, 2).shape)
+            plt.figure(figsize=(50, 10))
+            v = 0
             for ii in range(len(x[i][0].permute(3, 0, 1, 2))):
-                plt.subplot(3,7,ii+1)
-                b =  np.array(255*x[i][0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
-                plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
-                plt.axis("off")
-            
-               
-            plt.show()
+                # plt.subplot(3,7,ii+1)
+                # b =  np.array(x[i][0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                a = x[i][0].permute(3, 0, 1, 2)[ii, :, :, :]
+                # .permute(1, 2, 0)
+                for u in range(len(a.data)):
+                    print(u,a[u, :, :].shape)
+                    b =  np.array(a[u, :, :].cpu().detach().numpy())
+                    v = ii +  u + 1
+                    plt.subplot(6,9,ii +  u + 1)
+                    plt.imshow(b.astype('uint8'), cmap='gray')
+            # plt.show()
+                # print(a.data)
+                # plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
+                # plt.imshow(b.astype('uint8'))
+
+                # plt.axis("off")
+            # print("save/x"+str(i)+"x.png")
+            # plt.savefig("/save/x"+str(i)+"x.png")   
+            # plt.show()
             # import cv2
   
 
@@ -103,25 +121,42 @@ class Detect(nn.Module):
                 # # print((y[0].permute(3, 0, 1, 2)[0, :, :, :].shape))
                 
                 # print(len(y[0].permute(3, 0, 1, 2)))
-                plt.figure(figsize=(40, 10))
-                for ii in range(len(y[0].permute(3, 0, 1, 2))):
-                    print(ii,y[0].permute(3, 0, 1, 2)[ii, :, :, :],y[0].permute(3, 0, 1, 2)[ii, :, :, :].shape)
-                    plt.subplot(3,7,ii+1)
+                # plt.figure(figsize=(40, 10))
+                # for ii in range(len(y[0].permute(3, 0, 1, 2))):
+                    # print(ii,y[0].permute(3, 0, 1, 2)[ii, :, :, :],y[0].permute(3, 0, 1, 2)[ii, :, :, :].shape)
+                    # plt.subplot(3,7,ii+1)
                     # plt.subplot()
-                    b =  np.array(255*y[0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                    # b =  np.array(y[0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
                     
                     # print(b,b.shape)
                     # plt.imshow(out.astype('uint8'))
-                    plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
-                    plt.axis("off")
+                    # plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
+                    # plt.imshow(b.astype('uint8'), cmap='gray')
+                    
+                    # plt.axis("off")
+
+                # plt.figure(figsize=(50, 10))
+                for ii in range(len(x[i][0].permute(3, 0, 1, 2))):
+                    # plt.subplot(3,7,ii+1)
+                    # b =  np.array(x[i][0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                    a = y[0].permute(3, 0, 1, 2)[ii, :, :, :]
+                    # .permute(1, 2, 0)
+                    for u in range(len(a.data)):
+                        print(u,a[u, :, :].shape)
+                        b =  np.array(255*a[u, :, :].cpu().detach().numpy())
+                        plt.subplot(6, 9, v + u + ii +1)
+                        plt.imshow(b.astype('uint8'), cmap='gray')
+                
+                # plt.show()
 
                 # plt.show()
                 
-               
-                plt.show()
+                # plt.savefig("/save/y"+str(i)+"y.png")  
+                # plt.show()
             
                 # print(y[0])
                 z.append(y.view(bs, -1, self.no))
+            plt.show()
         # print(z)
 
         return x if self.training else (torch.cat(z, 1), x)
