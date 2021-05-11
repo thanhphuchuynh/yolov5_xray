@@ -74,15 +74,8 @@ class Detect(nn.Module):
            
             # print(x[i][0].permute(3, 0, 1, 2).shape)
             for ii in range(len(x[i][0].permute(3, 0, 1, 2))):
-                print(ii)
                 plt.subplot(3,7,ii+1)
-                
-
-                # plt.subplot()
                 b =  np.array(255*x[i][0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
-                
-                # print(b,b.shape)
-                # # plt.imshow(out.astype('uint8'))
                 plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
                 plt.axis("off")
             
