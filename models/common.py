@@ -195,6 +195,7 @@ class autoShape(nn.Module):
         return Detections(imgs, y, self.names)
 
 
+
 class Detections:
     # detections class for YOLOv5 inference results
     def __init__(self, imgs, pred, names=None):

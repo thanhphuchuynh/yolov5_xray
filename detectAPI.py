@@ -69,8 +69,8 @@ def draw_bbox(image, box, label, color):
     cv2.rectangle(overlay_text, (c1[0], c1[1]-7-text_height), (c1[0]+text_width+2, c1[1]),
                 (0, 0, 0), -1)
     cv2.addWeighted(overlay_text, alpha_box, output, 1 - alpha_box, 0, output)
-    print("hah")
-    print(color)
+    # print("hah")
+    # print(color)
     cv2.rectangle(output, c1, c2, color, thickness)
     cv2.putText(output, label.upper(), (c1[0], c1[1]-5),
             cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
@@ -84,7 +84,7 @@ def detect(name,save_img=False):
     total_e_array = []
 
     # weights = '/kaggle/weights/best512a100.pt'
-    weights = '/kaggle/weights/best055.pt'
+    weights = '/kaggle/weights/best_start.pt'
     # weights = '/kaggle/weights/best066.pt'
 
     # imgsz = 512
@@ -100,7 +100,7 @@ def detect(name,save_img=False):
     agnostic_nms = False
     classes = None
     save_conf = False
-    print(source)
+    # print(source)
    
     
     
@@ -120,6 +120,7 @@ def detect(name,save_img=False):
 
     # Load model
     model = attempt_load(weights, map_location=device)  # load FP32 model
+    # print(model)
     imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
     if half:
         model.half()  # to FP16
@@ -157,10 +158,14 @@ def detect(name,save_img=False):
 
         # Inference
         t1 = time_synchronized()
+        
         # pred = model(img, augment=opt.augment)[0]
-        pred = model(img, augment=False)[0]
+        pred = model(img, augment=True)[0]
+        
+        # print("\n",model(img, augment=True)[0], {len(list( model(img, augment=True).modules()))})
+        print(pred.shape)
 
-
+        # pred = model(()
         # Apply NMS
         pred = non_max_suppression(pred, conf_thres, iou_thres, classes=classes, agnostic=agnostic_nms)
         t2 = time_synchronized()
@@ -202,9 +207,10 @@ def detect(name,save_img=False):
                     label = f'{names[int(cls)]} {conf:.2f}'
                     # plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=2)
                     # print(list(np.int_(xyxy)))
-                    print(label_name)  
+                    # 
+                    # (label_name)  
                     color = colors[int(cls)]
-                    print(label_name != 'Finding' and label_name != 'No finding')
+                    # print(label_name != 'Finding' and label_name != 'No finding')
                     if label_name != 'Finding' and label_name != 'No finding':
                         im0 =  draw_bbox(im0, xyxy, label=label, color= color)
                     else:
@@ -214,9 +220,9 @@ def detect(name,save_img=False):
 
             # Print time (inference + NMS)
             print(f'{s}Done. ({t2 - t1:.3f}s)')
-            print(s)
+            # print(s)
             result = s
-            print(save_path)
+            # print(save_path,"sa")
             # Stream results
             # if view_img:
             #     cv2.imshow(str(p), im0)
@@ -288,7 +294,7 @@ async def create_file(files: bytes = File(...)):
 async def create_upload_file(files: UploadFile = File(...)):
     image = await files.read();
     # print(image)
-    print(files.file)
+    # print(files.file)
     
     file_location = f"/kaggle/a/{files.filename}"
     with open(file_location, "wb+") as file_object:

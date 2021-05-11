@@ -41,13 +41,55 @@ class Detect(nn.Module):
         self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  # output conv
 
     def forward(self, x):
+        import matplotlib
+            # import numpy as np
+        matplotlib.use('TkAgg')
+        import matplotlib.pyplot as plt
+        # print(type(x),x)
+        import cv2
+        from torchvision import transforms
         # x = x.copy()  # for profiling
         z = []  # inference output
         self.training |= self.export
         for i in range(self.nl):
+            # output.cpu().data.numpy().argmax()
+            import numpy as np
+           
+            import matplotlib.pyplot as plt
+  
+
+            # print(self.m[i],x[i].shape)
+          
             x[i] = self.m[i](x[i])  # conv
+
+            # print(x[i][0, :, :, :].data.shape)
+
             bs, _, ny, nx = x[i].shape  # x(bs,255,20,20) to x(bs,3,20,20,85)
             x[i] = x[i].view(bs, self.na, self.no, ny, nx).permute(0, 1, 3, 4, 2).contiguous()
+            # print("ha",x[i][0][1:4].shape)
+            # images = x[i][0]
+            # tensor_to_pil = transforms.ToPILImage()(x[i][0].squeeze_(0))
+            # print(tensor_to_pil.size)
+            # img = images.permute(1, 2, 0).cpu().detach().numpy()
+           
+            # print(x[i][0].permute(3, 0, 1, 2).shape)
+            for ii in range(len(x[i][0].permute(3, 0, 1, 2))):
+                print(ii)
+                plt.subplot(3,7,ii+1)
+                
+
+                # plt.subplot()
+                b =  np.array(255*x[i][0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                
+                # print(b,b.shape)
+                # # plt.imshow(out.astype('uint8'))
+                plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
+                plt.axis("off")
+            
+               
+            plt.show()
+            # import cv2
+  
 
             if not self.training:  # inference
                 if self.grid[i].shape[2:4] != x[i].shape[2:4]:
@@ -56,7 +98,38 @@ class Detect(nn.Module):
                 y = x[i].sigmoid()
                 y[..., 0:2] = (y[..., 0:2] * 2. - 0.5 + self.grid[i].to(x[i].device)) * self.stride[i]  # xy
                 y[..., 2:4] = (y[..., 2:4] * 2) ** 2 * self.anchor_grid[i]  # wh
+
+               
+                # b =  np.float32(y[0].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                # print(y[0].permute(3, 0, 1, 2).cpu().detach().numpy()[:, :, ::-1].shape)
+
+
+                # from torchvision import transforms
+                # from PIL import Image
+
+                # # print((y[0].permute(3, 0, 1, 2)[0, :, :, :].shape))
+                
+                # print(len(y[0].permute(3, 0, 1, 2)))
+                plt.figure(figsize=(40, 10))
+                for ii in range(len(y[0].permute(3, 0, 1, 2))):
+                    print(ii,y[0].permute(3, 0, 1, 2)[ii, :, :, :],y[0].permute(3, 0, 1, 2)[ii, :, :, :].shape)
+                    plt.subplot(3,7,ii+1)
+                    # plt.subplot()
+                    b =  np.array(255*y[0].permute(3, 0, 1, 2)[ii, :, :, :].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                    
+                    # print(b,b.shape)
+                    # plt.imshow(out.astype('uint8'))
+                    plt.imshow(cv2.cvtColor(b.astype('uint8'), cv2.COLOR_BGR2RGB))
+                    plt.axis("off")
+
+                # plt.show()
+                
+               
+                plt.show()
+            
+                # print(y[0])
                 z.append(y.view(bs, -1, self.no))
+        # print(z)
 
         return x if self.training else (torch.cat(z, 1), x)
 
@@ -100,18 +173,44 @@ class Model(nn.Module):
         # Init weights, biases
         initialize_weights(self)
         self.info()
+        # print(self)
         logger.info('')
 
     def forward(self, x, augment=False, profile=False):
+        # print(x)
         if augment:
+            # print(x.shape)
             img_size = x.shape[-2:]  # height, width
             s = [1, 0.83, 0.67]  # scales
             f = [None, 3, None]  # flips (2-ud, 3-lr)
             y = []  # outputs
             for si, fi in zip(s, f):
+                # print(si,fi)
                 xi = scale_img(x.flip(fi) if fi else x, si)
                 yi = self.forward_once(xi)[0]  # forward
-                # cv2.imwrite('img%g.jpg' % s, 255 * xi[0].numpy().transpose((1, 2, 0))[:, :, ::-1])  # save
+                
+                
+               
+               
+                # a = np.asarray(xi[0].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1], dtype=np.float16)
+               
+                # cv2.imwrite('img%g.jpg' % s, 255 * xi[0].cpu().data.numpy().transpose((1, 2, 0))[:, :, ::-1])  # save
+                # cv2.imshow("image",255 * xi[0].cpu().data.numpy().transpose((1, 2, 0))[:, :, ::-1])
+                # cv2.waitKey(0)
+
+                # print(xi.shape)
+
+                # import cv2
+                # import matplotlib
+                import numpy as np
+                # matplotlib.use('TkAgg')
+                # import matplotlib.pyplot as plt
+                # plt.axis("off")
+                # b =  np.float32(xi[0].permute(1, 2, 0).cpu().detach().numpy()[:, :, ::-1])
+                # print(b,b.shape,b.dtype,type(b))
+                # plt.imshow(cv2.cvtColor(b, cv2.COLOR_BGR2RGB))
+                # plt.show()
+                
                 yi[..., :4] /= si  # de-scale
                 if fi == 2:
                     yi[..., 1] = img_size[0] - yi[..., 1]  # de-flip ud
@@ -167,11 +266,14 @@ class Model(nn.Module):
     def fuse(self):  # fuse model Conv2d() + BatchNorm2d() layers
         print('Fusing layers... ')
         for m in self.model.modules():
+            # print(type(m))
             if type(m) is Conv and hasattr(m, 'bn'):
                 m.conv = fuse_conv_and_bn(m.conv, m.bn)  # update conv
                 delattr(m, 'bn')  # remove batchnorm
                 m.forward = m.fuseforward  # update forward
         self.info()
+        # print(self)
+
         return self
 
     def nms(self, mode=True):  # add or remove NMS module
