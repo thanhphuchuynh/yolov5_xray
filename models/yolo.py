@@ -8,7 +8,7 @@ from pathlib import Path
 import numpy as np
 import matplotlib    
 import matplotlib.pyplot as plt
-matplotlib.use('TKAgg')
+# matplotlib.use('TKAgg')
 import torch
 import torch.nn as nn
 
@@ -142,7 +142,7 @@ class Detect(nn.Module):
                     a = y[0].permute(3, 0, 1, 2)[ii, :, :, :]
                     # .permute(1, 2, 0)
                     for u in range(len(a.data)):
-                        print(u,a[u, :, :].shape)
+                        # print(u,a[u, :, :].shape)
                         b =  np.array(1024*a[u, :, :].cpu().detach().numpy())
                         plt.subplot(6, 9, v + u + ii +1)
                         plt.imshow(b.astype('uint8'), cmap='gray')
