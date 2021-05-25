@@ -200,8 +200,8 @@ def detect(name,save_img=False):
                     total_e += f'{names[int(cls)]} {conf:.2f},'
                     acc = f'{conf:.2f}'
                     label_name = f'{names[int(cls)]}'
-                    local = list(np.int_(xyxy))
-                    listToStrLocal = ' '.join([str(elem) for elem in local]) 
+                    # local = list(np.int_(xyxy))
+                    # listToStrLocal = ' '.join([str(elem) for elem in local]) 
                     # print("d")
                     # print(acc)
                     label = f'{names[int(cls)]} {conf:.2f}'
@@ -215,7 +215,9 @@ def detect(name,save_img=False):
                         im0 =  draw_bbox(im0, xyxy, label=label, color= color)
                     else:
                         print("A")
-                    total_e_array.append({'name': names[int(cls)],'conf': acc, 'local':listToStrLocal,'color': color })
+                    # total_e_array.append({'name': names[int(cls)],'conf': acc, 'local':listToStrLocal,'color': color })
+                    total_e_array.append({'name': names[int(cls)],'conf': acc,'color': color })
+                    
                     # print(color)
 
             # Print time (inference + NMS)

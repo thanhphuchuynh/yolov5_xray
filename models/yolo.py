@@ -4,8 +4,11 @@ import math
 import sys
 from copy import deepcopy
 from pathlib import Path
-from matplotlib.pyplot import bar_label
-
+# from matplotlib.pyplot import bar_label
+import numpy as np
+import matplotlib    
+import matplotlib.pyplot as plt
+matplotlib.use('TKAgg')
 import torch
 import torch.nn as nn
 
@@ -42,9 +45,9 @@ class Detect(nn.Module):
         self.m = nn.ModuleList(nn.Conv2d(x, self.no * self.na, 1) for x in ch)  # output conv
 
     def forward(self, x):
-        import matplotlib
+        
             # import numpy as np
-        matplotlib.use('TkAgg')
+        # matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
         # print(type(x),x)
         import cv2
@@ -56,10 +59,7 @@ class Detect(nn.Module):
         # fig, axis = plt.subplots(1,2,figsize=(15,5))
         for i in range(self.nl):
             # output.cpu().data.numpy().argmax()
-            import numpy as np
            
-            import matplotlib.pyplot as plt
-  
 
             # print(self.m[i],x[i].shape)
           
@@ -77,7 +77,7 @@ class Detect(nn.Module):
             # A = x[i][0].permute(3, 0, 1, 2)[0, :, :, :].permute(1, 2, 0).cpu().detach().numpy()
             # print(A, A.shape, A[:, :, ::-1].shape)
             # print(x[i][0].permute(3, 0, 1, 2).shape)
-            plt.figure(figsize=(50, 10))
+            plt.figure(figsize=(20, 10))
             v = 0
             for ii in range(len(x[i][0].permute(3, 0, 1, 2))):
                 # plt.subplot(3,7,ii+1)
@@ -86,7 +86,7 @@ class Detect(nn.Module):
                 # .permute(1, 2, 0)
                 for u in range(len(a.data)):
                     print(u,a[u, :, :].shape)
-                    b =  np.array(a[u, :, :].cpu().detach().numpy())
+                    b =  np.array(1024*a[u, :, :].cpu().detach().numpy())
                     v = ii +  u + 1
                     plt.subplot(6,9,ii +  u + 1)
                     plt.imshow(b.astype('uint8'), cmap='gray')
@@ -143,7 +143,7 @@ class Detect(nn.Module):
                     # .permute(1, 2, 0)
                     for u in range(len(a.data)):
                         print(u,a[u, :, :].shape)
-                        b =  np.array(255*a[u, :, :].cpu().detach().numpy())
+                        b =  np.array(1024*a[u, :, :].cpu().detach().numpy())
                         plt.subplot(6, 9, v + u + ii +1)
                         plt.imshow(b.astype('uint8'), cmap='gray')
                 
@@ -156,7 +156,7 @@ class Detect(nn.Module):
             
                 # print(y[0])
                 z.append(y.view(bs, -1, self.no))
-            plt.show()
+            # plt.show()
         # print(z)
 
         return x if self.training else (torch.cat(z, 1), x)

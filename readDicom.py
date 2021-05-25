@@ -10,9 +10,8 @@ import matplotlib.pyplot as plt
 import cv2
 imgage_id = '077c76dffde69c0b90c28d78ef2ac31e'
 dicom_image = '/Final/Dicom/vinbigdata/'+imgage_id+'.dicom'
-dicom = pydicom.read_file(dicom_image)
-print(dicom)
 
+dicom = pydicom.read_file(dicom_image)
 
 data_voi = apply_voi_lut(dicom.pixel_array, dicom)
 print(data_voi)
